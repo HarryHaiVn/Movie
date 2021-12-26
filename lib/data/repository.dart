@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
 import 'package:boilerplate/data/sharedpref/shared_preference_helper.dart';
+import 'package:boilerplate/models/gets/top_rate_response.dart';
 import 'package:boilerplate/models/post/post.dart';
 import 'package:boilerplate/models/post/post_list.dart';
 import 'package:sembast/sembast.dart';
 
 import 'local/constants/db_constants.dart';
+import 'network/apis/gets/get_api.dart';
 import 'network/apis/posts/post_api.dart';
 
 class Repository {
@@ -16,11 +18,22 @@ class Repository {
   // api objects
   final PostApi _postApi;
 
+  // api objects
+  final GetApi _getApi;
+
   // shared pref object
   final SharedPreferenceHelper _sharedPrefsHelper;
 
   // constructor
-  Repository(this._postApi, this._sharedPrefsHelper, this._postDataSource);
+  Repository(this._postApi, this._sharedPrefsHelper, this._postDataSource,
+      this._getApi);
+
+  // Top Rate Movie: ---------------------------------------------------------------------
+  Future<TopRateResponse> getTopRateMovie() async {
+    return await _getApi.getTopRateMovie().then((response) {
+      return response;
+    }).catchError((error) => throw error);
+  }
 
   // Post: ---------------------------------------------------------------------
   Future<PostList> getPosts() async {
@@ -66,10 +79,9 @@ class Repository {
       .then((id) => id)
       .catchError((error) => throw error);
 
-
   // Login:---------------------------------------------------------------------
   Future<bool> login(String email, String password) async {
-    return await Future.delayed(Duration(seconds: 2), ()=> true);
+    return await Future.delayed(Duration(seconds: 2), () => true);
   }
 
   Future<void> saveIsLoggedIn(bool value) =>

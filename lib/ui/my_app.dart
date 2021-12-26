@@ -2,6 +2,7 @@ import 'package:boilerplate/constants/app_theme.dart';
 import 'package:boilerplate/constants/strings.dart';
 import 'package:boilerplate/data/repository.dart';
 import 'package:boilerplate/di/components/service_locator.dart';
+import 'package:boilerplate/stores/movie/movie_store.dart';
 import 'package:boilerplate/utils/routes/routes.dart';
 import 'package:boilerplate/stores/language/language_store.dart';
 import 'package:boilerplate/stores/post/post_store.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
   // with Hot Reload than creating it directly in the `build` function.
   final ThemeStore _themeStore = ThemeStore(getIt<Repository>());
   final PostStore _postStore = PostStore(getIt<Repository>());
+  final MovieStore _movieStore = MovieStore(getIt<Repository>());
   final LanguageStore _languageStore = LanguageStore(getIt<Repository>());
   final UserStore _userStore = UserStore(getIt<Repository>());
 
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
       providers: [
         Provider<ThemeStore>(create: (_) => _themeStore),
         Provider<PostStore>(create: (_) => _postStore),
+        Provider<MovieStore>(create: (_) => _movieStore),
         Provider<LanguageStore>(create: (_) => _languageStore),
       ],
       child: Observer(
