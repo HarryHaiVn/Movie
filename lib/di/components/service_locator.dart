@@ -1,5 +1,6 @@
 
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
+import 'package:boilerplate/data/network/apis/gets/get_api.dart';
 import 'package:boilerplate/data/network/apis/posts/post_api.dart';
 import 'package:boilerplate/data/network/dio_client.dart';
 import 'package:boilerplate/data/network/rest_client.dart';
@@ -10,6 +11,7 @@ import 'package:boilerplate/di/module/network_module.dart';
 import 'package:boilerplate/stores/error/error_store.dart';
 import 'package:boilerplate/stores/form/form_store.dart';
 import 'package:boilerplate/stores/language/language_store.dart';
+import 'package:boilerplate/stores/movie/movie_store.dart';
 import 'package:boilerplate/stores/post/post_store.dart';
 import 'package:boilerplate/stores/theme/theme_store.dart';
 import 'package:boilerplate/stores/user/user_store.dart';
@@ -37,6 +39,7 @@ Future<void> setupLocator() async {
 
   // api's:---------------------------------------------------------------------
   getIt.registerSingleton(PostApi(getIt<DioClient>(), getIt<RestClient>()));
+  getIt.registerSingleton(GetApi(getIt<DioClient>(), getIt<RestClient>()));
 
   // data sources
   getIt.registerSingleton(PostDataSource(await getIt.getAsync<Database>()));
@@ -46,6 +49,7 @@ Future<void> setupLocator() async {
     getIt<PostApi>(),
     getIt<SharedPreferenceHelper>(),
     getIt<PostDataSource>(),
+    getIt<GetApi>(),
   ));
 
   // stores:--------------------------------------------------------------------
@@ -53,4 +57,5 @@ Future<void> setupLocator() async {
   getIt.registerSingleton(PostStore(getIt<Repository>()));
   getIt.registerSingleton(ThemeStore(getIt<Repository>()));
   getIt.registerSingleton(UserStore(getIt<Repository>()));
+  getIt.registerSingleton(MovieStore(getIt<Repository>()));
 }

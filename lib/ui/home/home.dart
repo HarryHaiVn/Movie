@@ -1,10 +1,14 @@
+import 'dart:math';
+
 import 'package:another_flushbar/flushbar_helper.dart';
 import 'package:boilerplate/data/sharedpref/constants/preferences.dart';
+import 'package:boilerplate/stores/movie/movie_store.dart';
 import 'package:boilerplate/utils/routes/routes.dart';
 import 'package:boilerplate/stores/language/language_store.dart';
 import 'package:boilerplate/stores/post/post_store.dart';
 import 'package:boilerplate/stores/theme/theme_store.dart';
 import 'package:boilerplate/utils/locale/app_localization.dart';
+import 'package:boilerplate/utils/utils.dart';
 import 'package:boilerplate/widgets/progress_indicator_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -18,8 +22,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final PageController _controller = PageController(initialPage: 0);
+  static const _kDuration = const Duration(milliseconds: 300);
+
+  static const _kCurve = Curves.ease;
+
   //stores:---------------------------------------------------------------------
   late PostStore _postStore;
+  late MovieStore _movieStore;
   late ThemeStore _themeStore;
   late LanguageStore _languageStore;
 
@@ -36,10 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _languageStore = Provider.of<LanguageStore>(context);
     _themeStore = Provider.of<ThemeStore>(context);
     _postStore = Provider.of<PostStore>(context);
+    _movieStore = Provider.of<MovieStore>(context);
 
     // check to see if already called api
     if (!_postStore.loading) {
       _postStore.getPosts();
+    }
+    if (!_movieStore.loading) {
+      _movieStore.getTopRateMovie();
     }
   }
 
@@ -47,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
+      backgroundColor: Colors.black,
       body: _buildBody(),
     );
   }
@@ -120,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMainContent() {
     return Observer(
       builder: (context) {
-        return _postStore.loading
+        return _movieStore.loading
             ? CustomProgressIndicatorWidget()
             : Material(child: _buildListView());
       },
@@ -128,19 +143,513 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildListView() {
-    return _postStore.postList != null
-        ? ListView.separated(
-            itemCount: _postStore.postList!.posts!.length,
-            separatorBuilder: (context, position) {
-              return Divider();
-            },
-            itemBuilder: (context, position) {
-              return _buildListItem(position);
-            },
+    return _movieStore.movieList != null
+        ? SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Stack(
+                  alignment: AlignmentDirectional.bottomStart,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 250.0,
+                      width: double.infinity,
+                      child: Container(
+                        color: Colors.grey,
+                        child: PageView(
+                          controller: _controller,
+                          children: <Widget>[
+                            Image.asset(
+                              'assets/images/ic_films.png',
+                              width: double.infinity,
+                              height: 250.0,
+                              fit: BoxFit.cover,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    "https://genk.mediacdn.vn/thumb_w/640/2019/11/17/12-1573986740140507895242-crop-15739867493461517382242.jpg",
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+//                      color: Colors.grey,
+                              ),
+                            ),
+                            Image.asset(
+                              'assets/images/ic_films.png',
+                              width: double.infinity,
+                              height: 250.0,
+                              fit: BoxFit.cover,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    new Container(
+//                  color: Colors.grey[800].withOpacity(0.3),
+                      padding: const EdgeInsets.all(20.0),
+                      child: new DotsIndicator(
+                        controller: _controller,
+                        itemCount: 3,
+                        onPageSelected: (int page) {
+                          _controller.animateToPage(
+                            page,
+                            duration: _kDuration,
+                            curve: _kCurve,
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.0, 4.0, 0, 0),
+                        child: Text(
+                          "AVENGERS: ENDGAME",
+                          style: TextStyle(
+                              fontSize: 26.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(16.0, 0, 0, 0.0),
+                        child: Text(
+                          "SUẤT CHIẾU SỚM",
+                          style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.yellow,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 0.0, 0, 0.0),
+                      child: Text(
+                        "Hành Động",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(" ",
+                          style: TextStyle(
+                            backgroundColor: Colors.white,
+                            fontSize: 10.0,
+                          )),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(4.0),
+                      child: Text(
+                        "2D",
+                        style: TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.white,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text(" ",
+                          style: TextStyle(
+                            backgroundColor: Colors.white,
+                            fontSize: 10,
+                          )),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(4.0),
+                      child: Text(
+                        "20h20p",
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(30.0, 0.0, 16.0, 0),
+                      padding: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.all(Radius.circular(
+                              24.0)), // set rounded corner radius
+                          boxShadow: [
+                            BoxShadow(
+                                blurRadius: 10.0,
+                                color: Colors.black,
+                                offset: Offset(1, 3))
+                          ] // make rounded corner of border
+                          ),
+                      child: Text("Đặt Vé",
+                          style: TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.white,
+                              fontStyle: FontStyle.normal)),
+                    ),
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 0, 4.0),
+                      child: Text(
+                        "Top Rate",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 4.0),
+                      child: Text(
+                        "Tất Cả",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            decoration: TextDecoration.underline,
+                            color: Colors.cyan,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 300.0, child: buildListMovieTopRateWidget()),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 0, 4.0),
+                      child: Text(
+                        "Phim đang chiếu",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 4.0),
+                      child: Text(
+                        "Tất Cả",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            decoration: TextDecoration.underline,
+                            color: Colors.cyan,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 200.0, child: buildListMoviePlayingWidget()),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 0, 4.0),
+                      child: Text(
+                        "Phim sắp chiếu",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                    Spacer(),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 4.0),
+                      child: Text(
+                        "Tất Cả",
+                        style: TextStyle(
+                            fontSize: 16.0,
+                            color: Colors.cyan,
+                            decoration: TextDecoration.underline,
+                            fontStyle: FontStyle.normal),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 10.0),
+                  child: SizedBox(
+                      height: 200.0, child: buildListMovieUpComingWidget()),
+                ),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(16.0, 24.0, 0, 4.0),
+                    child: Text(
+                      "Phim đặc biệt (4D/IMAX/STARIUM)",
+                      style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontStyle: FontStyle.normal),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(0, 0, 0, 10.0),
+                  child: SizedBox(height: 200.0, child: buildListViewWidget()),
+                ),
+              ],
+            ),
           )
         : Center(
             child: Text(
               AppLocalizations.of(context).translate('home_tv_no_post_found'),
+            ),
+          );
+  }
+
+  Widget buildListMovieTopRateWidget() {
+    return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _movieStore.movieList!.length,
+        itemExtent: 180.0,
+        itemBuilder: (context, position) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+            child: ClipPath(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Expanded(
+                    child: Card(
+                      elevation: 10.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(6.0),
+                        ),
+                      ),
+                      child: ClipPath(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                Utils.loadedPathImage(
+                                    _movieStore.movieList![position].posterPath ??
+                                        ""),
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+//                      color: Colors.grey,
+                          ),
+                        ),
+                        clipper: ShapeBorderClipper(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6.0))),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    title: Text(_movieStore.movieList![position].title ?? "",
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget buildListMoviePlayingWidget() {
+    return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _movieStore.movieList!.length,
+        itemExtent: 300.0,
+        itemBuilder: (context, position) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+            child: Card(
+              elevation: 10.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(6.0),
+                ),
+              ),
+              child: ClipPath(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(
+                              Utils.loadedPathImage(
+                                  _movieStore.movieList![position].posterPath ??
+                                      ""),
+                            ),
+                            fit: BoxFit.cover,
+                          ),
+//                      color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(_movieStore.movieList![position].title ?? "",
+                          overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        "Ngày chiếu : ${_movieStore.movieList![position].releaseDate ?? ""}",
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Icon(
+                        Icons.bookmark,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                clipper: ShapeBorderClipper(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0))),
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget buildListMovieUpComingWidget() {
+    return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _movieStore.movieList!.length,
+        itemExtent: 200.0,
+        itemBuilder: (context, position) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+            child: Card(
+              elevation: 10.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(6.0),
+                ),
+              ),
+              child: ClipPath(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(
+                              Utils.loadedPathImage(
+                                  _movieStore.movieList![position].posterPath ??
+                                      ""),
+                            ),
+                            fit: BoxFit.fill,
+//                        colorFilter: ColorFilter.mode(
+//                          Colors.black26,
+//                          BlendMode.darken,
+//                        ),
+                          ),
+//                      color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    ListTile(
+                      title: Text(_movieStore.movieList![position].title ?? "",
+                          overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        _movieStore.movieList![position].releaseDate ?? "",
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Icon(
+                        Icons.book,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                clipper: ShapeBorderClipper(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0))),
+              ),
+            ),
+          );
+        });
+  }
+
+  Widget buildListViewWidget() {
+    return _movieStore.movieList != null
+        ? ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _movieStore.movieList!.length,
+            itemExtent: 150.0,
+            itemBuilder: (context, position) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+                child: ClipPath(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: ClipOval(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                  Utils.loadedPathImage(_movieStore
+                                          .movieList![position].posterPath ??
+                                      ""),
+                                ),
+                                fit: BoxFit.fill,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                          title: Center(
+                        child: Text(
+                          _movieStore.movieList![position].title ?? "",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FontStyle.normal),
+                        ),
+                      )),
+                    ],
+                  ),
+                ),
+              );
+            })
+        : Center(
+            child: Text(
+              AppLocalizations.of(context).translate('home_tv_no_movie_found'),
             ),
           );
   }
@@ -154,7 +663,7 @@ class _HomeScreenState extends State<HomeScreen> {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         softWrap: false,
-        style: Theme.of(context).textTheme.title,
+        style: Theme.of(context).textTheme.bodyText1,
       ),
       subtitle: Text(
         '${_postStore.postList?.posts?[position].body}',
@@ -192,51 +701,53 @@ class _HomeScreenState extends State<HomeScreen> {
     return SizedBox.shrink();
   }
 
-_buildLanguageDialog() {
-  _showDialog<String>(
-    context: context,
-    child: MaterialDialog(
-      borderRadius: 5.0,
-      enableFullWidth: true,
-      title: Text(
-        AppLocalizations.of(context).translate('home_tv_choose_language'),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16.0,
+  _buildLanguageDialog() {
+    _showDialog<String>(
+      context: context,
+      child: MaterialDialog(
+        borderRadius: 5.0,
+        enableFullWidth: true,
+        title: Text(
+          AppLocalizations.of(context).translate('home_tv_choose_language'),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+          ),
         ),
-      ),
-      headerColor: Theme.of(context).primaryColor,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      closeButtonColor: Colors.white,
-      enableCloseButton: true,
-      enableBackButton: false,
-      onCloseButtonClicked: () {
-        Navigator.of(context).pop();
-      },
-      children: _languageStore.supportedLanguages
-          .map(
-            (object) => ListTile(
-              dense: true,
-              contentPadding: EdgeInsets.all(0.0),
-              title: Text(
-                object.language!,
-                style: TextStyle(
-                  color: _languageStore.locale == object.locale
-                      ? Theme.of(context).primaryColor
-                      : _themeStore.darkMode ? Colors.white : Colors.black,
+        headerColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        closeButtonColor: Colors.white,
+        enableCloseButton: true,
+        enableBackButton: false,
+        onCloseButtonClicked: () {
+          Navigator.of(context).pop();
+        },
+        children: _languageStore.supportedLanguages
+            .map(
+              (object) => ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.all(0.0),
+                title: Text(
+                  object.language!,
+                  style: TextStyle(
+                    color: _languageStore.locale == object.locale
+                        ? Theme.of(context).primaryColor
+                        : _themeStore.darkMode
+                            ? Colors.white
+                            : Colors.black,
+                  ),
                 ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  // change user language based on selected locale
+                  _languageStore.changeLanguage(object.locale!);
+                },
               ),
-              onTap: () {
-                Navigator.of(context).pop();
-                // change user language based on selected locale
-                _languageStore.changeLanguage(object.locale!);
-              },
-            ),
-          )
-          .toList(),
-    ),
-  );
-}
+            )
+            .toList(),
+      ),
+    );
+  }
 
   _showDialog<T>({required BuildContext context, required Widget child}) {
     showDialog<T>(
@@ -245,5 +756,68 @@ _buildLanguageDialog() {
     ).then<void>((T? value) {
       // The value passed to Navigator.pop() or null.
     });
+  }
+}
+
+class DotsIndicator extends AnimatedWidget {
+  DotsIndicator({
+    required this.controller,
+    required this.itemCount,
+    required this.onPageSelected,
+    this.color: Colors.white,
+  }) : super(listenable: controller);
+
+  /// The PageController that this DotsIndicator is representing.
+  final PageController controller;
+
+  /// The number of items managed by the PageController
+  final int itemCount;
+
+  /// Called when a dot is tapped
+  final ValueChanged<int> onPageSelected;
+
+  /// The color of the dots.
+  ///
+  /// Defaults to `Colors.white`.
+  final Color color;
+
+  // The base size of the dots
+  static const double _kDotSize = 8.0;
+
+  // The increase in the size of the selected dot
+  static const double _kMaxZoom = 2.0;
+
+  // The distance between the center of each dot
+  static const double _kDotSpacing = 25.0;
+
+  Widget _buildDot(int index) {
+    double selectedness = Curves.easeOut.transform(
+      max(
+        0.0,
+        1.0 - ((controller.page ?? controller.initialPage) - index).abs(),
+      ),
+    );
+    double zoom = 1.0 + (_kMaxZoom - 1.0) * selectedness;
+    return new Container(
+      width: _kDotSpacing,
+      child: new Material(
+        color: color,
+        type: MaterialType.circle,
+        child: new Container(
+          width: _kDotSize * zoom,
+          height: _kDotSize * zoom,
+          child: new InkWell(
+            onTap: () => onPageSelected(index),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: new List<Widget>.generate(itemCount, _buildDot),
+    );
   }
 }
