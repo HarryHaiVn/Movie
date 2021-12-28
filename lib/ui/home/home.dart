@@ -452,46 +452,51 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _movieStore.movieList!.length,
         itemExtent: 180.0,
         itemBuilder: (context, position) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
-            child: ClipPath(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Expanded(
-                    child: Card(
-                      elevation: 10.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(6.0),
-                        ),
-                      ),
-                      child: ClipPath(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                Utils.loadedPathImage(_movieStore
-                                        .movieList![position].posterPath ??
-                                    ""),
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-//                      color: Colors.grey,
+          return GestureDetector(
+            onTap: () {
+              handleOpenYoutube(position);
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+              child: ClipPath(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(
+                      child: Card(
+                        elevation: 10.0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(6.0),
                           ),
                         ),
-                        clipper: ShapeBorderClipper(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0))),
+                        child: ClipPath(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                  Utils.loadedPathImage(_movieStore
+                                          .movieList![position].posterPath ??
+                                      ""),
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+//                      color: Colors.grey,
+                            ),
+                          ),
+                          clipper: ShapeBorderClipper(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(6.0))),
+                        ),
                       ),
                     ),
-                  ),
-                  ListTile(
-                    title: Text(_movieStore.movieList![position].title ?? "",
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                ],
+                    ListTile(
+                      title: Text(_movieStore.movieList![position].title ?? "",
+                          overflow: TextOverflow.ellipsis),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -695,8 +700,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _handleErrorMessage() {
     return Observer(
       builder: (context) {
-        if (_postStore.errorStore.errorMessage.isNotEmpty) {
-          return _showErrorMessage(_postStore.errorStore.errorMessage);
+        if (_movieStore.errorStore.errorMessage.isNotEmpty) {
+          return _showErrorMessage(_movieStore.errorStore.errorMessage);
         }
 
         return SizedBox.shrink();
@@ -857,7 +862,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void handleFilter() {
     Navigator.of(context).pop();
-    if (_minYearController.text.isEmpty || _maxYearController.text.isEmpty){
+    if (_minYearController.text.isEmpty || _maxYearController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("You need to enter all the information."),
       ));
@@ -865,6 +870,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     _movieStore.filterTopRateMovie(
         int.parse(_minYearController.text), int.parse(_maxYearController.text));
+  }
+
+  Future<void> handleOpenYoutube(int position) async {
+    await _movieStore
+        .getKeyYouTubeMovie(_movieStore.movieList![position].id ?? -1);
   }
 }
 

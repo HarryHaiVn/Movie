@@ -99,6 +99,15 @@ mixin _$MovieStore on _MovieStore, Store {
         .run(() => super.filterTopRateMovie(mixYear, maxYear));
   }
 
+  final _$getKeyYouTubeMovieAsyncAction =
+      AsyncAction('_MovieStore.getKeyYouTubeMovie');
+
+  @override
+  Future<dynamic> getKeyYouTubeMovie(int movieId) {
+    return _$getKeyYouTubeMovieAsyncAction
+        .run(() => super.getKeyYouTubeMovie(movieId));
+  }
+
   @override
   String toString() {
     return '''

@@ -4,6 +4,7 @@ import 'package:boilerplate/data/network/constants/endpoints.dart';
 import 'package:boilerplate/data/network/dio_client.dart';
 import 'package:boilerplate/data/network/rest_client.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
+import 'package:boilerplate/models/movie/you_tube_info_response.dart';
 
 class MovieApi {
   // dio instance
@@ -27,10 +28,14 @@ class MovieApi {
   }
 
   /// Returns list data of movie in you tube
-  Future<TopRateResponse> getKeyYouTubeMovie() async {
+  Future<YouTubeInfoResponse> getKeyYouTubeMovie(int movieId) async {
     try {
-      final res = await _dioClient.get(Endpoints.getTopRateMovie);
-      return TopRateResponse.fromJson(res);
+      final url = Endpoints.baseUrlMovie +
+          "/" +
+          "$movieId" +
+          Endpoints.getYouTubeInfo;
+      final res = await _dioClient.get(url);
+      return YouTubeInfoResponse.fromJson(res);
     } catch (e) {
       print(e.toString());
       throw e;

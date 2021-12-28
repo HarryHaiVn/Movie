@@ -4,6 +4,7 @@ import 'package:boilerplate/data/local/datasources/movie/movie_datasource.dart';
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
 import 'package:boilerplate/data/sharedpref/shared_preference_helper.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
+import 'package:boilerplate/models/movie/you_tube_info_response.dart';
 import 'package:boilerplate/models/post/post.dart';
 import 'package:boilerplate/models/post/post_list.dart';
 import 'package:boilerplate/utils/utils.dart';
@@ -55,6 +56,12 @@ class Repository {
     }).catchError((error){
       throw error;
     });
+  }
+
+  Future<YouTubeInfoResponse> getKeyYouTubeMovie(int movieId) async {
+    return await _getApi.getKeyYouTubeMovie(movieId).then((response) {
+      return response;
+    }).catchError((error) => throw error);
   }
 
   // Post: ---------------------------------------------------------------------

@@ -1,8 +1,10 @@
+import 'package:boilerplate/data/network/constants/endpoints.dart';
 import 'package:boilerplate/data/repository.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/error/error_store.dart';
 import 'package:boilerplate/utils/dio/dio_error_util.dart';
 import 'package:mobx/mobx.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 part 'movie_store.g.dart';
 
@@ -65,6 +67,22 @@ abstract class _MovieStore with Store {
 
     future.then((response) {
       this.movieList = response;
+    }).catchError((error) {
+      errorStore.errorMessage = DioErrorUtil.handleError(error);
+    });
+  }
+
+  @action
+  Future<dynamic> getKeyYouTubeMovie(int movieId) async {
+    final future = _repository.getKeyYouTubeMovie(movieId);
+    future.then((response) {
+      if (response.results!.isNotEmpty) {
+        var keyYouTobe= response.results![0].key ?? "";
+        launch("${Endpoints.baseUrlYoutube}$keyYouTobe");
+        throw 'Could not launch ${Endpoints.baseUrlYoutube}$keyYouTobe';
+      } else {
+        errorStore.errorMessage = "Trailer not release";
+      }
     }).catchError((error) {
       errorStore.errorMessage = DioErrorUtil.handleError(error);
     });
