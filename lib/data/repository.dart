@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:boilerplate/data/local/datasources/movie/movie_datasource.dart';
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
 import 'package:boilerplate/data/sharedpref/shared_preference_helper.dart';
+import 'package:boilerplate/models/movie/movie_playing_response.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/models/movie/you_tube_info_response.dart';
 import 'package:boilerplate/models/post/post.dart';
@@ -38,6 +39,12 @@ class Repository {
       response.results?.forEach((movie) {
         _movieDataSource.updateOrInsert(movie);
       });
+      return response;
+    }).catchError((error) => throw error);
+  }
+
+  Future<MoviePlayingResponse> getMoviePlaying() async {
+    return await _getApi.getMoviePlaying().then((response) {
       return response;
     }).catchError((error) => throw error);
   }

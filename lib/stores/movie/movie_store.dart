@@ -1,5 +1,6 @@
 import 'package:boilerplate/data/network/constants/endpoints.dart';
 import 'package:boilerplate/data/repository.dart';
+import 'package:boilerplate/models/movie/movie_playing_response.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/error/error_store.dart';
 import 'package:boilerplate/utils/dio/dio_error_util.dart';
@@ -27,6 +28,9 @@ abstract class _MovieStore with Store {
   static ObservableFuture<List<Movie>?> emptyMovieFilterResponse =
       ObservableFuture.value(null);
 
+ static ObservableFuture<MoviePlayingResponse?> emptyMoviePlayingResponse =
+      ObservableFuture.value(null);
+
   @observable
   ObservableFuture<TopRateResponse?> fetchMoviesFuture =
       ObservableFuture<TopRateResponse?>(emptyMovieResponse);
@@ -36,7 +40,14 @@ abstract class _MovieStore with Store {
       ObservableFuture<List<Movie>?>(emptyMovieFilterResponse);
 
   @observable
+  ObservableFuture<MoviePlayingResponse?> moviePlayingFuture =
+      ObservableFuture<MoviePlayingResponse?>(emptyMoviePlayingResponse);
+
+  @observable
   List<Movie>? movieList = List.empty();
+
+  @observable
+  List<Movie>? moviePlayingList = List.empty();
 
   @observable
   bool success = false;
@@ -67,6 +78,18 @@ abstract class _MovieStore with Store {
 
     future.then((response) {
       this.movieList = response;
+    }).catchError((error) {
+      errorStore.errorMessage = DioErrorUtil.handleError(error);
+    });
+  }
+
+  @action
+  Future getMoviePlaying() async {
+    final future = _repository.getMoviePlaying();
+    moviePlayingFuture = ObservableFuture(future);
+
+    future.then((response) {
+      this.moviePlayingList = response.results;
     }).catchError((error) {
       errorStore.errorMessage = DioErrorUtil.handleError(error);
     });

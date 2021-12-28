@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:another_flushbar/flushbar_helper.dart';
 import 'package:boilerplate/data/sharedpref/constants/preferences.dart';
+import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/movie/movie_store.dart';
 import 'package:boilerplate/utils/routes/routes.dart';
 import 'package:boilerplate/stores/language/language_store.dart';
@@ -54,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (!_movieStore.loading) {
       _movieStore.getTopRateMovie();
+      _movieStore.getMoviePlaying();
     }
   }
 
@@ -143,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildListView() {
-    return _movieStore.movieList != null
+    return _movieStore.movieList != null || _movieStore.moviePlayingList != null
         ? SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -454,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemBuilder: (context, position) {
           return GestureDetector(
             onTap: () {
-              handleOpenYoutube(position);
+              handleOpenYoutube(_movieStore.movieList!, position);
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
@@ -506,55 +508,62 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget buildListMoviePlayingWidget() {
     return ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _movieStore.movieList!.length,
+        itemCount: _movieStore.moviePlayingList!.length,
         itemExtent: 300.0,
         itemBuilder: (context, position) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
-            child: Card(
-              elevation: 10.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(6.0),
+          return GestureDetector(
+            onTap: () {
+              handleOpenYoutube(_movieStore.moviePlayingList!, position);
+            },
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 0, 0, 0),
+              child: Card(
+                elevation: 10.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(6.0),
+                  ),
                 ),
-              ),
-              child: ClipPath(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(
-                              Utils.loadedPathImage(
-                                  _movieStore.movieList![position].posterPath ??
-                                      ""),
+                child: ClipPath(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                Utils.loadedPathImage(_movieStore
+                                        .moviePlayingList![position]
+                                        .posterPath ??
+                                    ""),
+                              ),
+                              fit: BoxFit.cover,
                             ),
-                            fit: BoxFit.cover,
-                          ),
 //                      color: Colors.grey,
+                          ),
                         ),
                       ),
-                    ),
-                    ListTile(
-                      title: Text(_movieStore.movieList![position].title ?? "",
-                          overflow: TextOverflow.ellipsis),
-                      subtitle: Text(
-                        "Ngày chiếu : ${_movieStore.movieList![position].releaseDate ?? ""}",
-                        overflow: TextOverflow.ellipsis,
+                      ListTile(
+                        title: Text(
+                            _movieStore.moviePlayingList![position].title ?? "",
+                            overflow: TextOverflow.ellipsis),
+                        subtitle: Text(
+                          "Ngày chiếu : ${_movieStore.moviePlayingList![position].releaseDate ?? ""}",
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Icon(
+                          Icons.bookmark,
+                          color: Colors.green,
+                        ),
                       ),
-                      trailing: Icon(
-                        Icons.bookmark,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  clipper: ShapeBorderClipper(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.0))),
                 ),
-                clipper: ShapeBorderClipper(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6.0))),
               ),
             ),
           );
@@ -872,9 +881,9 @@ class _HomeScreenState extends State<HomeScreen> {
         int.parse(_minYearController.text), int.parse(_maxYearController.text));
   }
 
-  Future<void> handleOpenYoutube(int position) async {
+  Future<void> handleOpenYoutube(List<Movie> movieList, int position) async {
     await _movieStore
-        .getKeyYouTubeMovie(_movieStore.movieList![position].id ?? -1);
+        .getKeyYouTubeMovie(movieList[position].id ?? -1);
   }
 }
 
