@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:boilerplate/data/local/datasources/movie/movie_datasource.dart';
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
 import 'package:boilerplate/data/sharedpref/shared_preference_helper.dart';
 import 'package:boilerplate/models/gets/top_rate_response.dart';
 import 'package:boilerplate/models/post/post.dart';
 import 'package:boilerplate/models/post/post_list.dart';
+import 'package:boilerplate/utils/utils.dart';
 import 'package:sembast/sembast.dart';
 
 import 'local/constants/db_constants.dart';
@@ -14,6 +16,7 @@ import 'network/apis/posts/post_api.dart';
 class Repository {
   // data source object
   final PostDataSource _postDataSource;
+  final MovieDataSource _movieDataSource;
 
   // api objects
   final PostApi _postApi;
@@ -26,13 +29,32 @@ class Repository {
 
   // constructor
   Repository(this._postApi, this._sharedPrefsHelper, this._postDataSource,
-      this._getApi);
+      this._getApi, this._movieDataSource);
 
   // Top Rate Movie: ---------------------------------------------------------------------
   Future<TopRateResponse> getTopRateMovie() async {
     return await _getApi.getTopRateMovie().then((response) {
+      response.results?.forEach((movie) {
+        _movieDataSource.updateOrInsert(movie);
+      });
       return response;
     }).catchError((error) => throw error);
+  }
+
+  Future<List<Movie>> filterTopRateMovie(int mixYear, int maxYear) async {
+    List<Movie> moviesList = <Movie>[];
+    return _movieDataSource.getMovieFromDb().then((movies) {
+      // movie list filtered
+      movies?.forEach((element) {
+        var year = Utils.getYear(element.releaseDate ?? "");
+        if (mixYear <= year && year <= maxYear) {
+          moviesList.add(element);
+        }
+      });
+      return moviesList;
+    }).catchError((error){
+      throw error;
+    });
   }
 
   // Post: ---------------------------------------------------------------------

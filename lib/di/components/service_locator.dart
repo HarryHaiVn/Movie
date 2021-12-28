@@ -1,4 +1,5 @@
 
+import 'package:boilerplate/data/local/datasources/movie/movie_datasource.dart';
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
 import 'package:boilerplate/data/network/apis/gets/get_api.dart';
 import 'package:boilerplate/data/network/apis/posts/post_api.dart';
@@ -43,6 +44,7 @@ Future<void> setupLocator() async {
 
   // data sources
   getIt.registerSingleton(PostDataSource(await getIt.getAsync<Database>()));
+  getIt.registerSingleton(MovieDataSource(await getIt.getAsync<Database>()));
 
   // repository:----------------------------------------------------------------
   getIt.registerSingleton(Repository(
@@ -50,6 +52,7 @@ Future<void> setupLocator() async {
     getIt<SharedPreferenceHelper>(),
     getIt<PostDataSource>(),
     getIt<GetApi>(),
+    getIt<MovieDataSource>(),
   ));
 
   // stores:--------------------------------------------------------------------
