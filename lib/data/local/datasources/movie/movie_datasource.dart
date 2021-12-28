@@ -1,5 +1,5 @@
 import 'package:boilerplate/data/local/constants/db_constants.dart';
-import 'package:boilerplate/models/gets/top_rate_response.dart';
+import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:sembast/sembast.dart';
 
 class MovieDataSource {

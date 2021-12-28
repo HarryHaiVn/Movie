@@ -1,7 +1,7 @@
 
 import 'package:boilerplate/data/local/datasources/movie/movie_datasource.dart';
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
-import 'package:boilerplate/data/network/apis/gets/get_api.dart';
+import 'package:boilerplate/data/network/apis/movies/movie_api.dart';
 import 'package:boilerplate/data/network/apis/posts/post_api.dart';
 import 'package:boilerplate/data/network/dio_client.dart';
 import 'package:boilerplate/data/network/rest_client.dart';
@@ -40,7 +40,7 @@ Future<void> setupLocator() async {
 
   // api's:---------------------------------------------------------------------
   getIt.registerSingleton(PostApi(getIt<DioClient>(), getIt<RestClient>()));
-  getIt.registerSingleton(GetApi(getIt<DioClient>(), getIt<RestClient>()));
+  getIt.registerSingleton(MovieApi(getIt<DioClient>(), getIt<RestClient>()));
 
   // data sources
   getIt.registerSingleton(PostDataSource(await getIt.getAsync<Database>()));
@@ -51,7 +51,7 @@ Future<void> setupLocator() async {
     getIt<PostApi>(),
     getIt<SharedPreferenceHelper>(),
     getIt<PostDataSource>(),
-    getIt<GetApi>(),
+    getIt<MovieApi>(),
     getIt<MovieDataSource>(),
   ));
 

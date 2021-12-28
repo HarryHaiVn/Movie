@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:boilerplate/data/local/datasources/movie/movie_datasource.dart';
 import 'package:boilerplate/data/local/datasources/post/post_datasource.dart';
 import 'package:boilerplate/data/sharedpref/shared_preference_helper.dart';
-import 'package:boilerplate/models/gets/top_rate_response.dart';
+import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/models/post/post.dart';
 import 'package:boilerplate/models/post/post_list.dart';
 import 'package:boilerplate/utils/utils.dart';
 import 'package:sembast/sembast.dart';
 
 import 'local/constants/db_constants.dart';
-import 'network/apis/gets/get_api.dart';
+import 'network/apis/movies/movie_api.dart';
 import 'network/apis/posts/post_api.dart';
 
 class Repository {
@@ -22,7 +22,7 @@ class Repository {
   final PostApi _postApi;
 
   // api objects
-  final GetApi _getApi;
+  final MovieApi _getApi;
 
   // shared pref object
   final SharedPreferenceHelper _sharedPrefsHelper;
