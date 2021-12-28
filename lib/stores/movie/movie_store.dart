@@ -22,18 +22,28 @@ abstract class _MovieStore with Store {
   static ObservableFuture<TopRateResponse?> emptyMovieResponse =
       ObservableFuture.value(null);
 
+  static ObservableFuture<List<Movie>?> emptyMovieFilterResponse =
+      ObservableFuture.value(null);
+
   @observable
   ObservableFuture<TopRateResponse?> fetchMoviesFuture =
       ObservableFuture<TopRateResponse?>(emptyMovieResponse);
 
   @observable
-  List<Movie>? movieList;
+  ObservableFuture<List<Movie>?> filterMoviesFuture =
+      ObservableFuture<List<Movie>?>(emptyMovieFilterResponse);
+
+  @observable
+  List<Movie>? movieList = List.empty();
 
   @observable
   bool success = false;
 
   @computed
   bool get loading => fetchMoviesFuture.status == FutureStatus.pending;
+
+  @computed
+  bool get filtered => filterMoviesFuture.status == FutureStatus.pending;
 
   // actions:-------------------------------------------------------------------
   @action
@@ -43,6 +53,18 @@ abstract class _MovieStore with Store {
 
     future.then((response) {
       this.movieList = response.results;
+    }).catchError((error) {
+      errorStore.errorMessage = DioErrorUtil.handleError(error);
+    });
+  }
+
+  @action
+  Future filterTopRateMovie(int mixYear, int maxYear) async {
+    final future = _repository.filterTopRateMovie(mixYear, maxYear);
+    filterMoviesFuture = ObservableFuture(future);
+
+    future.then((response) {
+      this.movieList = response;
     }).catchError((error) {
       errorStore.errorMessage = DioErrorUtil.handleError(error);
     });

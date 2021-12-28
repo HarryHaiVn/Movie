@@ -24,8 +24,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final PageController _controller = PageController(initialPage: 0);
   static const _kDuration = const Duration(milliseconds: 300);
-
+  final _formKey = GlobalKey<FormState>();
   static const _kCurve = Curves.ease;
+
+  //text controllers:-----------------------------------------------------------
+  TextEditingController _minYearController = TextEditingController();
+  TextEditingController _maxYearController = TextEditingController();
 
   //stores:---------------------------------------------------------------------
   late PostStore _postStore;
@@ -48,10 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _postStore = Provider.of<PostStore>(context);
     _movieStore = Provider.of<MovieStore>(context);
 
-    // check to see if already called api
-    if (!_postStore.loading) {
-      _postStore.getPosts();
-    }
     if (!_movieStore.loading) {
       _movieStore.getTopRateMovie();
     }
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMainContent() {
     return Observer(
       builder: (context) {
-        return _movieStore.loading
+        return _movieStore.loading || _movieStore.filtered
             ? CustomProgressIndicatorWidget()
             : Material(child: _buildListView());
       },
@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           controller: _controller,
                           children: <Widget>[
                             Image.asset(
-                              'assets/images/ic_films.png',
+                              'assets/images/ic_films.jpeg',
                               width: double.infinity,
                               height: 250.0,
                               fit: BoxFit.cover,
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: NetworkImage(
-                                    "https://genk.mediacdn.vn/thumb_w/640/2019/11/17/12-1573986740140507895242-crop-15739867493461517382242.jpg",
+                                    "https://h3f6a6h4.rocketcdn.me/wp-content/uploads/2021/08/Spider-Man-No-Way-Home-Trailer-Release-Update.jpg",
                                   ),
                                   fit: BoxFit.cover,
                                 ),
@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             Image.asset(
-                              'assets/images/ic_films.png',
+                              'assets/images/ic_films.jpeg',
                               width: double.infinity,
                               height: 250.0,
                               fit: BoxFit.cover,
@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Padding(
                         padding: EdgeInsets.fromLTRB(16.0, 4.0, 0, 0),
                         child: Text(
-                          "AVENGERS: ENDGAME",
+                          "SPIDER-MAN: NO WAY HOME",
                           style: TextStyle(
                               fontSize: 26.0,
                               color: Colors.white,
@@ -322,16 +322,34 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Spacer(),
                     Padding(
-                      padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 4.0),
-                      child: Text(
-                        "Tất Cả",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            decoration: TextDecoration.underline,
-                            color: Colors.cyan,
-                            fontStyle: FontStyle.normal),
-                      ),
-                    ),
+                        padding: EdgeInsets.fromLTRB(16.0, 24.0, 16.0, 4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            new GestureDetector(
+                              onTap: () {
+                                showDialogFilter();
+                              },
+                              child: Text(
+                                "Filters",
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    decoration: TextDecoration.underline,
+                                    color: Colors.cyan,
+                                    fontStyle: FontStyle.normal),
+                              ),
+                            ),
+                            SizedBox(width: 10.0),
+                            Text(
+                              "Tất Cả",
+                              style: TextStyle(
+                                  fontSize: 16.0,
+                                  decoration: TextDecoration.underline,
+                                  color: Colors.cyan,
+                                  fontStyle: FontStyle.normal),
+                            ),
+                          ],
+                        )),
                   ],
                 ),
                 SizedBox(height: 300.0, child: buildListMovieTopRateWidget()),
@@ -454,9 +472,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           decoration: BoxDecoration(
                             image: DecorationImage(
                               image: NetworkImage(
-                                Utils.loadedPathImage(
-                                    _movieStore.movieList![position].posterPath ??
-                                        ""),
+                                Utils.loadedPathImage(_movieStore
+                                        .movieList![position].posterPath ??
+                                    ""),
                               ),
                               fit: BoxFit.cover,
                             ),
@@ -756,6 +774,97 @@ class _HomeScreenState extends State<HomeScreen> {
     ).then<void>((T? value) {
       // The value passed to Navigator.pop() or null.
     });
+  }
+
+  void showDialogFilter() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            content: Stack(
+              clipBehavior: Clip.none,
+              children: <Widget>[
+                Positioned(
+                  right: -40.0,
+                  top: -40.0,
+                  child: InkResponse(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: CircleAvatar(
+                      child: Icon(Icons.close),
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
+                ),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      SizedBox(
+                        height: 14.0,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          controller: _minYearController,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Min Year",
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _maxYearController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: "Max Year",
+                            counterText: '',
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          child: Text("Apply"),
+                          onPressed: () {
+                            handleFilter();
+                          },
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  @override
+  void dispose() {
+    // Clean up the controller when the Widget is removed from the Widget tree
+    _minYearController.dispose();
+    _maxYearController.dispose();
+    super.dispose();
+  }
+
+  void handleFilter() {
+    Navigator.of(context).pop();
+    if (_minYearController.text.isEmpty || _maxYearController.text.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("You need to enter all the information."),
+      ));
+      return;
+    }
+    _movieStore.filterTopRateMovie(
+        int.parse(_minYearController.text), int.parse(_maxYearController.text));
   }
 }
 

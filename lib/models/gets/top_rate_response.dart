@@ -72,7 +72,7 @@ class Movie {
   Movie({
     bool? adult,
     String? backdropPath,
-    List<int>? genreIds,
+    List<dynamic>? genreIds,
     int? id,
     String? originalLanguage,
     String? originalTitle,
@@ -120,7 +120,7 @@ class Movie {
 
   bool? _adult;
   String? _backdropPath;
-  List<int>? _genreIds;
+  List<dynamic>? _genreIds;
   int? _id;
   String? _originalLanguage;
   String? _originalTitle;
@@ -137,8 +137,9 @@ class Movie {
 
   String? get backdropPath => _backdropPath;
 
-  List<int>? get genreIds => _genreIds;
+  List<dynamic>? get genreIds => _genreIds;
 
+  set setId(int value) => _id = value;
   int? get id => _id;
 
   String? get originalLanguage => _originalLanguage;
@@ -180,4 +181,37 @@ class Movie {
     return map;
   }
 
+  factory Movie.fromMap(Map<String, dynamic> json) => Movie(
+        adult: json["adult"],
+        backdropPath: json["backdrop_path"],
+        // genreIds: json["genre_ids"],
+        originalLanguage: json["original_language"],
+        originalTitle: json["original_title"],
+        overview: json["overview"],
+        popularity: json["popularity"],
+        posterPath: json["poster_path"],
+        releaseDate: json["release_date"],
+        video: json["video"],
+        id: json["id"],
+        title: json["title"],
+        voteAverage: json["vote_average"],
+        voteCount: json["vote_count"],
+      );
+
+  Map<String, dynamic> toMap() => {
+        "adult": adult,
+        "backdrop_path": backdropPath,
+        "genre_ids": genreIds,
+        "original_language": originalLanguage,
+        "original_title": originalTitle,
+        "overview": overview,
+        "popularity": popularity,
+        "poster_path": posterPath,
+        "release_date": releaseDate,
+        "video": video,
+        "vote_average": voteAverage,
+        "vote_count": voteCount,
+        "id": id,
+        "title": title,
+      };
 }
