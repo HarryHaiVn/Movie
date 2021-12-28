@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:boilerplate/data/network/constants/endpoints.dart';
 import 'package:boilerplate/data/network/dio_client.dart';
 import 'package:boilerplate/data/network/rest_client.dart';
-import 'package:boilerplate/models/gets/top_rate_response.dart';
+import 'package:boilerplate/models/movie/top_rate_response.dart';
 
 class GetApi {
   // dio instance
@@ -17,6 +17,17 @@ class GetApi {
 
   /// Returns list of Top Rate Movie in response
   Future<TopRateResponse> getTopRateMovie() async {
+    try {
+      final res = await _dioClient.get(Endpoints.getTopRateMovie);
+      return TopRateResponse.fromJson(res);
+    } catch (e) {
+      print(e.toString());
+      throw e;
+    }
+  }
+
+  /// Returns list data of movie in you tube
+  Future<TopRateResponse> getKeyYouTubeMovie() async {
     try {
       final res = await _dioClient.get(Endpoints.getTopRateMovie);
       return TopRateResponse.fromJson(res);

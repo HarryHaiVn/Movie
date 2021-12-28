@@ -15,6 +15,12 @@ mixin _$MovieStore on _MovieStore, Store {
   bool get loading => (_$loadingComputed ??=
           Computed<bool>(() => super.loading, name: '_MovieStore.loading'))
       .value;
+  Computed<bool>? _$filteredComputed;
+
+  @override
+  bool get filtered => (_$filteredComputed ??=
+          Computed<bool>(() => super.filtered, name: '_MovieStore.filtered'))
+      .value;
 
   final _$fetchMoviesFutureAtom = Atom(name: '_MovieStore.fetchMoviesFuture');
 
@@ -28,6 +34,21 @@ mixin _$MovieStore on _MovieStore, Store {
   set fetchMoviesFuture(ObservableFuture<TopRateResponse?> value) {
     _$fetchMoviesFutureAtom.reportWrite(value, super.fetchMoviesFuture, () {
       super.fetchMoviesFuture = value;
+    });
+  }
+
+  final _$filterMoviesFutureAtom = Atom(name: '_MovieStore.filterMoviesFuture');
+
+  @override
+  ObservableFuture<List<Movie>?> get filterMoviesFuture {
+    _$filterMoviesFutureAtom.reportRead();
+    return super.filterMoviesFuture;
+  }
+
+  @override
+  set filterMoviesFuture(ObservableFuture<List<Movie>?> value) {
+    _$filterMoviesFutureAtom.reportWrite(value, super.filterMoviesFuture, () {
+      super.filterMoviesFuture = value;
     });
   }
 
@@ -69,13 +90,24 @@ mixin _$MovieStore on _MovieStore, Store {
     return _$getTopRateMovieAsyncAction.run(() => super.getTopRateMovie());
   }
 
+  final _$filterTopRateMovieAsyncAction =
+      AsyncAction('_MovieStore.filterTopRateMovie');
+
+  @override
+  Future<dynamic> filterTopRateMovie(int mixYear, int maxYear) {
+    return _$filterTopRateMovieAsyncAction
+        .run(() => super.filterTopRateMovie(mixYear, maxYear));
+  }
+
   @override
   String toString() {
     return '''
 fetchMoviesFuture: ${fetchMoviesFuture},
+filterMoviesFuture: ${filterMoviesFuture},
 movieList: ${movieList},
 success: ${success},
-loading: ${loading}
+loading: ${loading},
+filtered: ${filtered}
     ''';
   }
 }

@@ -1,5 +1,5 @@
 import 'package:boilerplate/data/repository.dart';
-import 'package:boilerplate/models/gets/top_rate_response.dart';
+import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/error/error_store.dart';
 import 'package:boilerplate/utils/dio/dio_error_util.dart';
 import 'package:mobx/mobx.dart';
