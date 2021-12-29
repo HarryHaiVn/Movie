@@ -1,6 +1,7 @@
 import 'package:boilerplate/data/network/constants/endpoints.dart';
 import 'package:boilerplate/data/repository.dart';
 import 'package:boilerplate/models/movie/movie_playing_response.dart';
+import 'package:boilerplate/models/movie/movie_up_coming_response.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/error/error_store.dart';
 import 'package:boilerplate/utils/dio/dio_error_util.dart';
@@ -28,11 +29,14 @@ abstract class _MovieStore with Store {
   static ObservableFuture<List<Movie>?> emptyMovieFilterResponse =
       ObservableFuture.value(null);
 
- static ObservableFuture<MoviePlayingResponse?> emptyMoviePlayingResponse =
+  static ObservableFuture<MoviePlayingResponse?> emptyMoviePlayingResponse =
+      ObservableFuture.value(null);
+  
+  static ObservableFuture<MovieUpComingResponse?> emptyMovieUpComingResponse =
       ObservableFuture.value(null);
 
   @observable
-  ObservableFuture<TopRateResponse?> fetchMoviesFuture =
+  ObservableFuture<TopRateResponse?> topRateMoviesFuture =
       ObservableFuture<TopRateResponse?>(emptyMovieResponse);
 
   @observable
@@ -42,6 +46,9 @@ abstract class _MovieStore with Store {
   @observable
   ObservableFuture<MoviePlayingResponse?> moviePlayingFuture =
       ObservableFuture<MoviePlayingResponse?>(emptyMoviePlayingResponse);
+  @observable
+  ObservableFuture<MovieUpComingResponse?> movieUpComingFuture =
+      ObservableFuture<MovieUpComingResponse?>(emptyMovieUpComingResponse);
 
   @observable
   List<Movie>? movieList = List.empty();
@@ -50,10 +57,17 @@ abstract class _MovieStore with Store {
   List<Movie>? moviePlayingList = List.empty();
 
   @observable
+  List<Movie>? movieUpComingList = List.empty();
+
+  @observable
   bool success = false;
 
   @computed
-  bool get loading => fetchMoviesFuture.status == FutureStatus.pending;
+  bool get loadingTopRateMovies => topRateMoviesFuture.status == FutureStatus.pending;
+  @computed
+  bool get loadingMoviePlaying => moviePlayingFuture.status == FutureStatus.pending;
+  @computed
+  bool get loadingMovieUpComing => movieUpComingFuture.status == FutureStatus.pending;
 
   @computed
   bool get filtered => filterMoviesFuture.status == FutureStatus.pending;
@@ -62,7 +76,7 @@ abstract class _MovieStore with Store {
   @action
   Future getTopRateMovie() async {
     final future = _repository.getTopRateMovie();
-    fetchMoviesFuture = ObservableFuture(future);
+    topRateMoviesFuture = ObservableFuture(future);
 
     future.then((response) {
       this.movieList = response.results;
@@ -96,11 +110,23 @@ abstract class _MovieStore with Store {
   }
 
   @action
+  Future getMovieUpcoming() async {
+    final future = _repository.getMovieUpcoming();
+    movieUpComingFuture = ObservableFuture(future);
+
+    future.then((response) {
+      this.movieUpComingList = response.results;
+    }).catchError((error) {
+      errorStore.errorMessage = DioErrorUtil.handleError(error);
+    });
+  }
+
+  @action
   Future<dynamic> getKeyYouTubeMovie(int movieId) async {
     final future = _repository.getKeyYouTubeMovie(movieId);
     future.then((response) {
       if (response.results!.isNotEmpty) {
-        var keyYouTobe= response.results![0].key ?? "";
+        var keyYouTobe = response.results![0].key ?? "";
         launch("${Endpoints.baseUrlYoutube}$keyYouTobe");
         throw 'Could not launch ${Endpoints.baseUrlYoutube}$keyYouTobe';
       } else {

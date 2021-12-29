@@ -54,9 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _postStore = Provider.of<PostStore>(context);
     _movieStore = Provider.of<MovieStore>(context);
 
-    if (!_movieStore.loading) {
+    if (!_movieStore.loadingTopRateMovies) {
       _movieStore.getTopRateMovie();
+    }
+    if (!_movieStore.loadingMoviePlaying) {
       _movieStore.getMoviePlaying();
+    }
+    if (!_movieStore.loadingMovieUpComing) {
+      _movieStore.getMovieUpcoming();
     }
   }
 
@@ -138,7 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMainContent() {
     return Observer(
       builder: (context) {
-        return _movieStore.loading || _movieStore.filtered
+        return _movieStore.loadingTopRateMovies ||
+                _movieStore.filtered ||
+                _movieStore.loadingMoviePlaying ||
+                _movieStore.loadingMovieUpComing
             ? CustomProgressIndicatorWidget()
             : Material(child: _buildListView());
       },
@@ -146,7 +154,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildListView() {
-    return _movieStore.movieList != null || _movieStore.moviePlayingList != null
+    return _movieStore.movieList != null ||
+            _movieStore.moviePlayingList != null ||
+            _movieStore.movieUpComingList != null
         ? SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -574,7 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget buildListMovieUpComingWidget() {
     return ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _movieStore.movieList!.length,
+        itemCount: _movieStore.movieUpComingList!.length,
         itemExtent: 200.0,
         itemBuilder: (context, position) {
           return Padding(
@@ -596,9 +606,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: NetworkImage(
-                              Utils.loadedPathImage(
-                                  _movieStore.movieList![position].posterPath ??
-                                      ""),
+                              Utils.loadedPathImage(_movieStore
+                                      .movieUpComingList![position]
+                                      .posterPath ??
+                                  ""),
                             ),
                             fit: BoxFit.fill,
 //                        colorFilter: ColorFilter.mode(
@@ -611,10 +622,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     ListTile(
-                      title: Text(_movieStore.movieList![position].title ?? "",
+                      title: Text(
+                          _movieStore.movieUpComingList![position].title ?? "",
                           overflow: TextOverflow.ellipsis),
                       subtitle: Text(
-                        _movieStore.movieList![position].releaseDate ?? "",
+                        _movieStore.movieUpComingList![position].releaseDate ??
+                            "",
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Icon(
@@ -883,7 +896,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> handleOpenYoutube(List<Movie> movieList, int position) async {
-    Navigator.pushNamed(context, MovieDetailScreen.detail, arguments: movieList[position]);
+    Navigator.pushNamed(context, MovieDetailScreen.detail,
+        arguments: movieList[position]);
   }
 }
 

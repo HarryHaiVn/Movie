@@ -20,8 +20,10 @@ class Endpoints {
 
   // top rated endpoints
   static const String getTopRateMovie = baseUrlMovie + "/top_rated?api_key=f7b43fb7fcb594401ceeffb0ae60be57&language=en-US&page=1";
-  // top rated endpoints
+  // top movie playing endpoints
   static const String getMoviePlaying = baseUrlMovie + "/now_playing?api_key=f7b43fb7fcb594401ceeffb0ae60be57&language=en-US&page=1";
+  // top movie playing endpoints
+  static const String getMovieUpcoming = baseUrlMovie + "/upcoming?api_key=f7b43fb7fcb594401ceeffb0ae60be57&language=en-US&page=1";
   // youTube info endpoints
   static const String getYouTubeInfo = "/videos?api_key=f7b43fb7fcb594401ceeffb0ae60be57&language=en-US";
 }
