@@ -57,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!_movieStore.loading) {
       _movieStore.getTopRateMovie();
       _movieStore.getMoviePlaying();
+      _movieStore.getMovieUpcoming();
     }
   }
 
@@ -146,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildListView() {
-    return _movieStore.movieList != null || _movieStore.moviePlayingList != null
+    return _movieStore.movieList != null || _movieStore.moviePlayingList != null|| _movieStore.movieUpComingList != null
         ? SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -574,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget buildListMovieUpComingWidget() {
     return ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: _movieStore.movieList!.length,
+        itemCount: _movieStore.movieUpComingList!.length,
         itemExtent: 200.0,
         itemBuilder: (context, position) {
           return Padding(
@@ -597,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           image: DecorationImage(
                             image: NetworkImage(
                               Utils.loadedPathImage(
-                                  _movieStore.movieList![position].posterPath ??
+                                  _movieStore.movieUpComingList![position].posterPath ??
                                       ""),
                             ),
                             fit: BoxFit.fill,
@@ -611,10 +612,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     ListTile(
-                      title: Text(_movieStore.movieList![position].title ?? "",
+                      title: Text(_movieStore.movieUpComingList![position].title ?? "",
                           overflow: TextOverflow.ellipsis),
                       subtitle: Text(
-                        _movieStore.movieList![position].releaseDate ?? "",
+                        _movieStore.movieUpComingList![position].releaseDate ?? "",
                         overflow: TextOverflow.ellipsis,
                       ),
                       trailing: Icon(
