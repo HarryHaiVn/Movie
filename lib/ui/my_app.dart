@@ -2,7 +2,9 @@ import 'package:boilerplate/constants/app_theme.dart';
 import 'package:boilerplate/constants/strings.dart';
 import 'package:boilerplate/data/repository.dart';
 import 'package:boilerplate/di/components/service_locator.dart';
+import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/movie/movie_store.dart';
+import 'package:boilerplate/ui/detail/movie_detail.dart';
 import 'package:boilerplate/utils/routes/routes.dart';
 import 'package:boilerplate/stores/language/language_store.dart';
 import 'package:boilerplate/stores/post/post_store.dart';
@@ -44,6 +46,21 @@ class MyApp extends StatelessWidget {
             theme: _themeStore.darkMode ? themeDataDark : themeData,
             routes: Routes.routes,
             locale: Locale(_languageStore.locale),
+            onGenerateRoute: (settings) {
+              final arguments = settings.arguments;
+              if (settings.name == MovieDetailScreen.detail &&
+                  arguments is Movie) {
+                return MaterialPageRoute(
+                    builder: (_) => MovieDetailScreen(
+                          title: arguments.title,
+                          movieId: arguments.id,
+                          posterUrl: arguments.posterPath,
+                          releaseDate: arguments.releaseDate,
+                          voteAverage: arguments.voteAverage.toString(),
+                          description: arguments.overview,
+                        ));
+              }
+            },
             supportedLocales: _languageStore.supportedLanguages
                 .map((language) => Locale(language.locale!, language.code))
                 .toList(),

@@ -4,6 +4,7 @@ import 'package:another_flushbar/flushbar_helper.dart';
 import 'package:boilerplate/data/sharedpref/constants/preferences.dart';
 import 'package:boilerplate/models/movie/top_rate_response.dart';
 import 'package:boilerplate/stores/movie/movie_store.dart';
+import 'package:boilerplate/ui/detail/movie_detail.dart';
 import 'package:boilerplate/utils/routes/routes.dart';
 import 'package:boilerplate/stores/language/language_store.dart';
 import 'package:boilerplate/stores/post/post_store.dart';
@@ -882,8 +883,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> handleOpenYoutube(List<Movie> movieList, int position) async {
-    await _movieStore
-        .getKeyYouTubeMovie(movieList[position].id ?? -1);
+    Navigator.pushNamed(context, MovieDetailScreen.detail, arguments: movieList[position]);
   }
 }
 
